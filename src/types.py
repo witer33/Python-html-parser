@@ -6,6 +6,7 @@ class Tag:
         self.level = level
         self.one_tag = one_tag
         self.content = content
+        self.args["tag_content"] = content
         self.source = suorce
         self.index = index
         self.self_enclosing = False
@@ -37,6 +38,9 @@ class Tag:
 
     def find(self, name: str, args: list = {}, **args2):
         return self.source.find(name, self.index, args, **args2)
+
+    def find_all(self, name: str, args: list = {}, **args2):
+        return self.source.find_all(name, self.index, args, **args2)
     
     def get_parent(self):
         return self.source.find(None, self.index, reverse=True, level=(self.level - 1))
