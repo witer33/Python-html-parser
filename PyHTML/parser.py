@@ -52,15 +52,6 @@ class Parser:
             return self.tokens[self.token_count - 1]
         return None
 
-
-    def _sort_level(_, tag: Union[OpeningTag, ClosingTag]):
-        """
-        Internal method to returns a tag's level
-        """
-
-        return tag.level
-
-
     def _parse_string(self):
         """
         Parses a string within its delimiters
