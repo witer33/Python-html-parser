@@ -1,5 +1,6 @@
 #Witer33 HTML-Parser
 from src.types import Tag, OpeningTag, ClosingTag, Text
+import re
 
 class Parser:
 
@@ -170,19 +171,64 @@ class Parser:
             if tag.name == name or not name:
                 breaked = False
                 for arg, value in args.items():
-                    if value != tag.args.get(arg, ""):
-                        breaked = True
-                        break
+                    if not isinstance(value, re.Pattern):
+                        if value != tag.args.get(arg, ""):
+                            breaked = True
+                            break
+                    else:
+                        if not value.match(tag.args.get(arg, "")):
+                            breaked = True
+                            break
                 for arg, value in args2.items():
-                    if value != tag.args.get(arg, ""):
-                        breaked = True
-                        break
+                    if not isinstance(value, re.Pattern):
+                        if value != tag.args.get(arg, ""):
+                            breaked = True
+                            break
+                    else:
+                        if not value.match(tag.args.get(arg, "")):
+                            breaked = True
+                            break
                 if breaked:
                     continue
                 if level:
                     if tag.level != level:
                         continue
                 return tag
+
+    def find_all(self, name: str, after: int = 0, args: list = {}, reverse: bool = False, level: int = None, **args2):
+
+        results = []
+        for tag in (self.tags[after:] if not reverse else self.tags[:after][::-1]):
+            if tag.name == name or not name:
+                breaked = False
+                for arg, value in args.items():
+                    if not isinstance(value, re.Pattern):
+                        if value != tag.args.get(arg, ""):
+                            breaked = True
+                            break
+                    else:
+                        if not value.match(tag.args.get(arg, "")):
+                            breaked = True
+                            break
+                for arg, value in args2.items():
+                    if not isinstance(value, re.Pattern):
+                        if value != tag.args.get(arg, ""):
+                            breaked = True
+                            break
+                    else:
+                        if not value.match(tag.args.get(arg, "")):
+                            breaked = True
+                            break
+                if breaked:
+                    continue
+                if level:
+                    if tag.level != level:
+                        continue
+                results.append(tag)
+        if len(results) > 0:
+            return results
+        else:
+            return
 
     def __getattr__(self, name):
         return self.find(name)
