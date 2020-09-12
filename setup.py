@@ -23,7 +23,7 @@ with open("README.md", "r") as fh:
 
 
 setuptools.setup(
-    name="PyHTML",
+    name="Pyrser",
     version="0.1.0",
     author="Witer33",
     author_email="dev@witer33.com",
