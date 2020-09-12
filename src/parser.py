@@ -1,5 +1,5 @@
 #Witer33 HTML-Parser
-from wparser.types import Tag, OpeningTag, ClosingTag, Text
+from src.types import Tag, OpeningTag, ClosingTag, Text
 
 class Parser:
 
