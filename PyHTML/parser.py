@@ -1,48 +1,85 @@
-#Witer33 HTML-Parser
-from src.types import Tag, OpeningTag, ClosingTag, Text
+# Python HTML Parser - A simple, fast and pure-python HTML parser
+# Copyright (C) 2020-2021 witer33 <https://github.com/witer33>
+#
+# This file is part of Python HTML Parser.
+#
+# Python HTML Parser is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Python HTML Parser is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with Python HTML Parser.  If not, see <http://www.gnu.org/licenses/>.
+
+
+from .types import Tag, OpeningTag, ClosingTag, Text
+from typing import Union
 import re
+
 
 class Parser:
 
-    source = None
-    char_counter = 0
-    token_counter = 0
-    tags = []
-    tokens = []
-    current_level = 0
-
-    @staticmethod
-    def level_sort(tag):
-        return tag.level
-
     def __init__(self, source: str):
-        self.source = str(source)
-        self.parse()
+        self.source = source
+        self.pos = 0
+        self.token_count = 0
+        self.tags = []
+        self.tokens = []
+        self.level = 0
 
     def advance(self):
-        self.char_counter += 1
-        if len(self.source) >= self.char_counter:
-            return self.source[self.char_counter - 1]
+        """
+        Steps one character forward in self.source
+        """
+
+        self.pos += 1
+        if len(self.source) >= self.pos:
+            return self.source[self.pos - 1]
         return None
 
-    def token_advance(self):
-        self.token_counter += 1
-        if len(self.tokens) >= self.token_counter:
-            return self.tokens[self.token_counter - 1]
+    def advance_token(self):
+        """
+        Steps one character forward in self.tokens
+        """
+
+        self.token_count += 1
+        if len(self.tokens) >= self.token_count:
+            return self.tokens[self.token_count - 1]
         return None
 
-    def parse_string(self):
+
+    def _sort_level(_, tag: Union[OpeningTag, ClosingTag]):
+        """
+        Internal method to returns a tag's level
+        """
+
+        return tag.level
+
+
+    def _parse_string(self):
+        """
+        Parses a string within its delimiters
+        """
+
         char = self.advance()
         string = ""
-
-        while(char):
+        while char:
             if char == '"':
                 return string
             else:
                 string += char
             char = self.advance()
 
-    def parse_tag(self):
+    def _parse_tag(self):
+        """
+        Parses an HTML tag
+        """
+
         char = self.advance()
         closer_tag = False
         in_args = False
@@ -51,8 +88,7 @@ class Parser:
         arg_name = ""
         arg_value = ""
         args = {}
-
-        while(char):
+        while char:
             if char == "/":
                 closer_tag = True
             elif char == " ":
@@ -77,7 +113,7 @@ class Parser:
                     arg_name += char
                 elif in_args_value:
                     if char == '"':
-                        string = self.parse_string()
+                        string = self._parse_string()
                         arg_value = string
                     else:
                         arg_value += char
@@ -85,42 +121,40 @@ class Parser:
                     tag_name += char
             char = self.advance()
 
-    def closing_tag_searcher(self, tag_name):
-        reset_counter = self.token_counter
-        token = self.token_advance()
+    def _find_closing_tag(self, tag_name: str) -> bool:
+        """
+        Finds a closing tag for the given tag_name
+        """
+
+        reset_counter = self.token_count
+        token = self.advance_token()
         closing_needed = 1
-
-        while(token):
-
+        while token:
             if isinstance(token, ClosingTag) and token.name == tag_name:
                 closing_needed -= 1
-
             if closing_needed == 0:
-                self.token_counter = reset_counter
+                self.token_count = reset_counter
                 return False
-
             if isinstance(token, OpeningTag) and token.name == tag_name:
                 closing_needed += 1
-
-            token = self.token_advance()
-        
-        self.token_counter = reset_counter
+            token = self.advance_token()
+        self.token_count = reset_counter
         return True
 
-    def token_parser(self):
-        token = self.token_advance()
+    def _parse_tokens(self):
+        """
+        Performs token parsing
+        """
 
-        while(token):
+        token = self.advance_token()
+        while token:
             if isinstance(token, OpeningTag):
-                token.self_enclosing = self.closing_tag_searcher(token.name)
-            token = self.token_advance()
-
-        self.token_counter = 0
-        token = self.token_advance()
+                token.self_enclosing = self._find_closing_tag(token.name)
+            token = self.advance_token()
+        self.token_count = 0
+        token = self.advance_token()
         opened_tags = []
-
-        while(token):
-
+        while token:
             if isinstance(token, OpeningTag) and not token.self_enclosing:
                 token.level = len(opened_tags)
                 opened_tags.append(token)
@@ -131,42 +165,36 @@ class Parser:
             elif isinstance(token, Text) and len(opened_tags) > 0:
                 if token.content:
                     opened_tags[-1].content += token.content
-
-            token = self.token_advance()
-        self.token_counter = 0
+            token = self.advance_token()
+        self.token_count = 0
 
     def parse(self):
+        """
+        Parses self.source
+        """
+
         char = self.advance()
         current_text = ""
-
-        while(char):
-
+        while char:
             if char == "<":
                 if len(self.tokens) > 0:
                     self.tokens.append(Text(current_text))
                 current_text = ""
-                token = self.parse_tag()
+                token = self._parse_tag()
                 self.tokens.append(token)
             else:
                 current_text += char
-
             char = self.advance()
-        
-        self.token_parser()
-
-        self.token_counter = 0
-        token = self.token_advance()
-
-        while(token):
-
+        self._parse_tokens()
+        self.token_count = 0
+        token = self.advance_token()
+        while token:
             if isinstance(token, OpeningTag):
                 index = len(self.tags)
                 self.tags.append(Tag(self, token.name, token.args, level=token.level, content=token.content, self_enclosing=token.self_enclosing, index=index))
-
-            token = self.token_advance()
+            token = self.advance_token()
 
     def find(self, name: str, after: int = 0, args: list = {}, reverse: bool = False, level: int = None, **args2):
-
         for tag in (self.tags[after:] if not reverse else self.tags[:after][::-1]):
             if tag.name == name or not name:
                 breaked = False
@@ -196,7 +224,6 @@ class Parser:
                 return tag
 
     def find_all(self, name: str, after: int = 0, args: list = {}, reverse: bool = False, level: int = None, **args2):
-
         results = []
         for tag in (self.tags[after:] if not reverse else self.tags[:after][::-1]):
             if tag.name == name or not name:

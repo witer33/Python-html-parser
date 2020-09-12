@@ -1,0 +1,9 @@
+README.md
+setup.py
+PyHTML/__init__.py
+PyHTML/parser.py
+PyHTML/types.py
+PyHTML.egg-info/PKG-INFO
+PyHTML.egg-info/SOURCES.txt
+PyHTML.egg-info/dependency_links.txt
+PyHTML.egg-info/top_level.txt

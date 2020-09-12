@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: PyHTML
+Version: 0.1.0
+Summary: A simple, fast and pure-python HTML parser
+Home-page: https://github.com/witer33/Python-HTML-Parser
+Author: Witer33
+Author-email: dev@witer33.com
+License: UNKNOWN
+Description: # Python-html-parser
+        A pure Python HTML Parser.
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: OS Independent
+Classifier: License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)
+Requires-Python: >=3.5
+Description-Content-Type: text/markdown
