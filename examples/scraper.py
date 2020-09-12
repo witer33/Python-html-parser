@@ -1,9 +1,9 @@
 from src import Parser
 import requests
 
-suorce = requests.get("https://example.com").content
+source = requests.get("https://example.com").content
 
-html = Parser(suorce)
+html = Parser(source)
 
 print(html.title.content)
 print(html.title.parent.name)
