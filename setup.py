@@ -24,7 +24,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="HtmlPyrser",
-    version="0.1.0",
+    version="0.1.1",
     author="Witer33",
     author_email="dev@witer33.com",
     description="A simple, fast and pure-python HTML parser",
