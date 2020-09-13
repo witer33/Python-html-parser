@@ -180,7 +180,7 @@ class Parser:
         self.token_count = 0
         token = self.advance_token()
         while token:
-            if isinstance(token, OpeningTag):
+            if isinstance(token, OpeningTag) and token.name != "!--":
                 index = len(self.tags)
                 self.tags.append(Tag(self, token.name, token.args, level=token.level, content=token.content, self_enclosing=token.self_enclosing, index=index))
             token = self.advance_token()
